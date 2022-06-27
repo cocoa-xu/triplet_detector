@@ -4,13 +4,14 @@ defmodule TripletDetector.MixProject do
   @app :triplet_detector
   @version "0.1.0"
   @github_url "https://github.com/cocoa-xu/triplet_detector"
+  @precompiled_artefacts_version "0.1.0"
 
   def project do
     [
       app: @app,
       version: version(),
       elixir: "~> 1.12",
-      compilers: [:elixir_precompiled_deployer] ++ Mix.compilers(),
+      compilers: Mix.compilers() ++ [:elixir_precompiled_deployer],
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       name: "TripletDetector",
@@ -22,12 +23,13 @@ defmodule TripletDetector.MixProject do
 
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger, :ssl, :inets]
     ]
   end
 
   def version, do: @version
   def github_url, do: @github_url
+  def precompiled_artefacts_version, do: @precompiled_artefacts_version
 
   defp deps do
     [
@@ -47,7 +49,7 @@ defmodule TripletDetector.MixProject do
   defp package() do
     [
       name: to_string(@app),
-      files: ~w(priv lib mix.exs  README* LICENSE* precompiled_deploy.exs),
+      files: ~w(priv lib mix.exs README* LICENSE* precompiled_deploy.exs),
       licenses: ["Apache-2.0"],
       links: %{"GitHub" => github_url()}
     ]
