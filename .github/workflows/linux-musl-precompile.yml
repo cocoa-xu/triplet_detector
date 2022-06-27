@@ -26,13 +26,24 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y wget
+          if [ "${{ matrix.pair.triplet }}" = "x86_64-linux-musl" ]; then
+            export TOOLCHAIN_NAME="${{ matrix.pair.triplet }}-native" ;
+          else
+            export TOOLCHAIN_NAME="${{ matrix.pair.triplet }}-cross" ;
+          fi
+          export TOOLCHAIN_FILE="${TOOLCHAIN_NAME}.tgz"
           wget "https://musl.cc/${TOOLCHAIN_FILE}" -O "${TOOLCHAIN_FILE}"
           tar xf "${TOOLCHAIN_FILE}"
           rm -f "${TOOLCHAIN_FILE}"
-          
+
       - name: Compiled shared library
         run: |
-          export CC="$(pwd)/${TOOLCHAIN_NAME}/bin/${MUSL_TRIPLET}-gcc"
+          if [ "${{ matrix.pair.triplet }}" = "x86_64-linux-musl" ]; then
+            export TOOLCHAIN_NAME="${{ matrix.pair.triplet }}-native" ;
+          else
+            export TOOLCHAIN_NAME="${{ matrix.pair.triplet }}-cross" ;
+          fi
+          export CC="$(pwd)/${TOOLCHAIN_NAME}/bin/${{ matrix.pair.triplet }}-gcc"
           echo "CC: ${CC}"
 
           echo '#include <stdio.h>' > main.c
