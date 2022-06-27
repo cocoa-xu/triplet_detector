@@ -66,28 +66,37 @@ defmodule TripletDetector do
 
   def fetch_triplets([triplet | rest], save_to) when is_binary(triplet) do
     filename = "#{triplet}.so"
-    url = "#{TripletDetector.MixProject.github_url}/releases/download/precompiled-artefacts-v#{TripletDetector.MixProject.precompiled_artefacts_version}/#{filename}"
+
+    url =
+      "#{TripletDetector.MixProject.github_url()}/releases/download/precompiled-artefacts-v#{TripletDetector.MixProject.precompiled_artefacts_version()}/#{filename}"
+
     priv_so = Path.join([save_to, filename])
 
     with {:create_priv_dir, :ok} <- {:create_priv_dir, File.mkdir_p(save_to)},
          {:priv_so_exists, false} <- {:priv_so_exists, File.exists?(priv_so)},
          {:download_artefacts, {:ok, so_data}} <- {:download_artefacts, download_artefact(url)},
          {:save_so, :ok} <- {:save_so, File.write(priv_so, so_data)} do
-          fetch_triplets(rest, save_to)
+      fetch_triplets(rest, save_to)
     else
       {:create_priv_dir, status} ->
         Logger.error("Failed to create directory: #{inspect(status)}")
         {:error, status}
-      {:priv_so_exists, true} -> fetch_triplets(rest, save_to)
+
+      {:priv_so_exists, true} ->
+        fetch_triplets(rest, save_to)
+
       {:download_artefacts, {:ssl_status, status}} ->
         Logger.error("Failed to start ssl: #{inspect(status)}")
         {:error, status}
+
       {:download_artefacts, {:inet_status, status}} ->
         Logger.error("Failed to start inet: #{inspect(status)}")
         {:error, status}
+
       {:download_artefacts, status} ->
         Logger.error("Failed to download artefact from #{url}: #{inspect(status)}")
         {:error, status}
+
       {:save_so, status} ->
         error = "Failed to save downloaded file: #{inspect(status)}"
         Logger.error(error)
@@ -109,17 +118,20 @@ defmodule TripletDetector do
     arg = {url, []}
 
     with {:ssl_status, :ok} <- {:ssl_status, :ssl.start()},
-         {:inet_status, :ok} <- {:inet_status, case :inets.start() do
-          :ok -> :ok
-          {:error, {:already_started, :inets}} -> :ok
-          status -> status
-        end} do
-          case :httpc.request(:get, arg, http_opts, opts) do
-            {:ok, {{_, 200, _}, _, body}} ->
-              {:ok, body}
+         {:inet_status, :ok} <-
+           {:inet_status,
+            case :inets.start() do
+              :ok -> :ok
+              {:error, {:already_started, :inets}} -> :ok
+              status -> status
+            end} do
+      case :httpc.request(:get, arg, http_opts, opts) do
+        {:ok, {{_, 200, _}, _, body}} ->
+          {:ok, body}
 
-            status -> status
-          end
+        status ->
+          status
+      end
     else
       status -> status
     end
