@@ -34,7 +34,12 @@ defmodule TripletDetector do
   def all_triplets, do: @all_triplets
 
   @doc """
-  Detect current machine's triplet `ARCH-OS-ABI`.
+  Detect current node's triplet `ARCH-OS-ABI`.
+
+  ## Example
+
+    iex> TripletDetector.detect()
+
   """
   @spec detect() :: {:ok, String.t()} | {:error, :no_match}
   def detect do
@@ -46,7 +51,17 @@ defmodule TripletDetector do
   end
 
   @doc """
-  Detect current machine's triplet `ARCH-OS-ABI` in a custom range.
+  Detect current node's triplet `ARCH-OS-ABI` in a custom range.
+
+  ## Example
+
+    # Only test if current node is x86_64-apple-darwin or arm64-apple-darwin
+    iex> TripletDetector.detect(["x86_64-apple-darwin", "arm64-apple-darwin"])
+
+    # {:error, :no_match} will be returned if there is no match
+    iex> {:error, :no_match} = TripletDetector.detect(["not-exists"])
+    iex> {:error, :no_match} = TripletDetector.detect([])
+
   """
   @spec detect([String.t()]) :: {:ok, String.t()} | {:error, :no_match}
   def detect([current | rest]) do
@@ -58,12 +73,13 @@ defmodule TripletDetector do
         false -> detect(rest)
       end
     else
-      false
+      {:error, :no_match}
     end
   end
 
   def detect([]), do: {:error, :no_match}
 
+  @spec fetch_triplets(nil | [String.t()], String.t()) :: :ok | {:error, term()}
   def fetch_triplets([triplet | rest], save_to) when is_binary(triplet) do
     filename = "#{triplet}.so"
 

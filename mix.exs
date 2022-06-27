@@ -15,7 +15,7 @@ defmodule TripletDetector.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       name: "TripletDetector",
-      description: "Detecting current machine's triplet `ARCH-OS-ABI` in pure Elixir.",
+      description: "Detecting current node's triplet `ARCH-OS-ABI` in pure Elixir.",
       docs: docs(),
       package: package()
     ]

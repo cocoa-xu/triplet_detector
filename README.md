@@ -1,6 +1,6 @@
 # TripletDetector
 
-Detecting current machine's triplet `ARCH-OS-ABI` in pure Elixir.
+Detecting current node's triplet `ARCH-OS-ABI` in pure Elixir.
 
 ## Installation
 
