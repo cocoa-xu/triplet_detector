@@ -41,13 +41,27 @@ defmodule TripletDetector do
     iex> TripletDetector.detect()
 
   """
-  @spec detect() :: {:ok, String.t()} | {:error, :no_match}
+  @spec detect() :: {:ok, String.t()} | {:error, String.t()}
   def detect do
     case :os.type() do
       {:unix, :darwin} -> detect(@all_apple_triplets)
       {:unix, _} -> detect(@all_linux_triplets)
-      {:win32, _} -> {:error, :no_match}
+      {:win32, _} -> {:error, "unknown"}
     end
+  end
+
+  @doc """
+  Bang(!) version of detect().
+
+  ## Example
+
+    iex> TripletDetector.detect!()
+
+  """
+  @spec detect!() :: String.t()
+  def detect!() do
+    {_, value} = detect()
+    value
   end
 
   @doc """
@@ -58,12 +72,14 @@ defmodule TripletDetector do
     # Only test if current node is x86_64-apple-darwin or arm64-apple-darwin
     iex> TripletDetector.detect(["x86_64-apple-darwin", "arm64-apple-darwin"])
 
-    # {:error, :no_match} will be returned if there is no match
-    iex> {:error, :no_match} = TripletDetector.detect(["not-exists"])
-    iex> {:error, :no_match} = TripletDetector.detect([])
+    # {:error, "unknown"} will be returned if there is no match
+    iex> TripletDetector.detect(["not-exists"])
+    {:error, "unknown"}
+    iex> TripletDetector.detect([])
+    {:error, "unknown"}
 
   """
-  @spec detect([String.t()]) :: {:ok, String.t()} | {:error, :no_match}
+  @spec detect([String.t()]) :: {:ok, String.t()} | {:error, String.t()}
   def detect([current | rest]) do
     func_name = String.to_atom(String.replace(current, "-", "_") <> "?")
 
@@ -73,12 +89,40 @@ defmodule TripletDetector do
         false -> detect(rest)
       end
     else
-      {:error, :no_match}
+      {:error, "unknown"}
     end
   end
 
-  def detect([]), do: {:error, :no_match}
+  def detect([]), do: {:error, "unknown"}
 
+  @doc """
+  Bang(!) version of detect().
+
+  ## Example
+
+    iex> TripletDetector.detect!(["not-exists"])
+    "unknown"
+
+  """
+  @spec detect!([String.t()]) :: String.t()
+  def detect!(triplets) do
+    {_, value} = detect(triplets)
+    value
+  end
+
+  @doc """
+  Download precompiled shared libraries.
+
+  ## Parameters
+    - `triplets`: A list of triplet strings.
+    - `save_to`: Directory to save downloaded files.
+
+  ## Example
+
+    # Download `x86_64-linux-gnu` shared library to system tmp dir.
+    iex> TripletDetector.fetch_triplets(["x86_64-linux-gnu"], System.tmp_dir!())
+
+  """
   @spec fetch_triplets(nil | [String.t()], String.t()) :: :ok | {:error, term()}
   def fetch_triplets([triplet | rest], save_to) when is_binary(triplet) do
     filename = "#{triplet}.so"
