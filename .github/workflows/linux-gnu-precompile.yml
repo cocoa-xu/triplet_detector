@@ -50,7 +50,8 @@ jobs:
           export CC="${{ matrix.pair.cc }}"
           echo "CC: ${CC}"
 
-          echo "void triplet_detector(){}" > main.c
+          echo '#include <stdio.h>' > main.c
+          echo 'void triplet_detector(){printf("hello world");}' >> main.c
           ${CC} -fPIC -fvisibility=hidden  -shared -Os -Wl,--as-needed -ffunction-sections -fdata-sections -o "${{ matrix.pair.triplet }}.so" main.c
 
       - uses: softprops/action-gh-release@v1

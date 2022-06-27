@@ -27,7 +27,8 @@ jobs:
             export CPPFLAGS="${{ matrix.pair.cpp_flags }}"
           fi
           
-          echo "void triplet_detector(){}" > main.c
+          echo '#include <stdio.h>' > main.c
+          echo 'void triplet_detector(){printf("hello world");}' >> main.c
           gcc "${CPPFLAGS}" -fPIC -fvisibility=hidden -shared -Os -ffunction-sections -fdata-sections -o "${{ matrix.pair.triplet }}.so" main.c
 
       - uses: softprops/action-gh-release@v1
