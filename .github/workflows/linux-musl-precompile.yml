@@ -1,0 +1,45 @@
+name: linux-musl-artefacts
+
+on:
+  push:
+    tags:
+      - 'precompiled-artefacts-v*'
+
+jobs:
+  precompile:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: true
+      matrix:
+        triplet: ["aarch64-linux-musl",
+                  "aarch64_be-linux-musl",
+                  "armv7l-linux-musleabihf",
+                  "armv7m-linux-musleabi",
+                  "armv7r-linux-musleabihf",
+                  "powerpc64le-linux-musl",
+                  "riscv32-linux-musl",
+                  "riscv64-linux-musl",
+                  "x86_64-linux-musl"]
+
+    steps:
+      - name: Install musl C Compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget "https://musl.cc/${TOOLCHAIN_FILE}" -O "${TOOLCHAIN_FILE}"
+          tar xf "${TOOLCHAIN_FILE}"
+          rm -f "${TOOLCHAIN_FILE}"
+          
+      - name: Compiled shared library
+        run: |
+          export CC="$(pwd)/${TOOLCHAIN_NAME}/bin/${MUSL_TRIPLET}-gcc"
+          echo "CC: ${CC}"
+
+          echo '#include <stdio.h>' > main.c
+          echo 'void triplet_detector(){printf("hello world");}' >> main.c
+          ${CC} -fPIC -fvisibility=hidden -shared -Os -Wl,--as-needed -ffunction-sections -fdata-sections -o "${{ matrix.pair.triplet }}.so" main.c
+
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: "${{ matrix.pair.triplet }}.so"
