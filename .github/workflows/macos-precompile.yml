@@ -1,0 +1,37 @@
+name: macos-precompile
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - precompiled-artefacts
+
+jobs:
+  precompile:
+    runs-on: macos-11
+    env:
+      MIX_ENV: "dev"
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - pair:
+              triplet: x86_64-apple-darwin
+          - pair:
+              triplet: arm64-apple-darwin
+              cpp_flags: "-arch arm64"
+
+    steps:
+      - name: Compiled shared library
+        run: |
+          if [ "${{ matrix.pair.cpp_flags }}" != "" ]; then
+            export CPPFLAGS="${{ matrix.pair.cpp_flags }}"
+          fi
+          
+          echo "void triplet_detector(){}" > main.c
+          gcc "${CPPFLAGS}" -fPIC -fvisibility=hidden -shared -Os -ffunction-sections -fdata-sections -o "${{ matrix.pair.triplet }}.so" main.c
+
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: "${{ matrix.pair.triplet }}.so"

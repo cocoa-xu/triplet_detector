@@ -1,0 +1,60 @@
+name: linux-artefacts
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - precompiled-artefacts
+
+jobs:
+  precompile:
+    runs-on: ubuntu-20.04
+    env:
+      MIX_ENV: "dev"
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - pair:
+              triplet: x86_64-linux-gnu
+              c_compiler: gcc
+              cc: gcc
+          - pair:
+              triplet: aarch64-linux-gnu
+              c_compiler: gcc-aarch64-linux-gnu
+              cc: "/usr/bin/aarch64-linux-gnu-gcc"
+          - pair:
+              triplet: arm-linux-gnueabihf
+              c_compiler: gcc-arm-linux-gnueabihf
+              cc: "/usr/bin/arm-linux-gnueabihf-gcc-9"
+          - pair:
+              triplet: riscv64-linux-gnu
+              c_compiler: gcc-riscv64-linux-gnu
+              cc: "/usr/bin/riscv64-linux-gnu-gcc"
+          - pair:
+              triplet: s390x-linux-gnu
+              c_compiler: gcc-s390x-linux-gnu
+              cc: "/usr/bin/s390x-linux-gnu-gcc"
+          - pair:
+              triplet: powerpc64le-linux-gnu
+              c_compiler: gcc-powerpc64le-linux-gnu
+              cc: "/usr/bin/powerpc64le-linux-gnu-gcc"
+
+    steps:
+      - name: Install C Compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential ${{ matrix.pair.c_compiler }}
+
+      - name: Compiled shared library
+        run: |
+          export CC="${{ matrix.pair.cc }}"
+          echo "CC: ${CC}"
+
+          echo "void triplet_detector(){}" > main.c
+          ${CC} -fPIC -fvisibility=hidden  -shared -Os -Wl,--as-needed -ffunction-sections -fdata-sections -o "${{ matrix.pair.triplet }}.so" main.c
+
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: "${{ matrix.pair.triplet }}.so"
