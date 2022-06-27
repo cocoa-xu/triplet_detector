@@ -3,8 +3,7 @@ name: macos-precompile
 on:
   push:
     tags:
-      - 'v*'
-      - precompiled-artefacts
+      - 'precompiled-artefacts-v*'
 
 jobs:
   precompile:
