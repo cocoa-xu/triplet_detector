@@ -4,14 +4,28 @@ Detecting current node's triplet `ARCH-OS-ABI` in pure Elixir. Not depending on 
 
 The following triplet can be detected:
 
+### macOS
+- x86_64-apple-darwin
+- arm64-apple-darwin
+
+### Linux GNU libc
 - x86_64-linux-gnu
 - aarch64-linux-gnu
 - arm-linux-gnueabihf
 - riscv64-linux-gnu
 - s390x-linux-gnu
 - powerpc64le-linux-gnu
-- x86_64-apple-darwin
-- arm64-apple-darwin
+
+### Linux musl libc
+- x86_64-linux-musl
+- aarch64-linux-musl
+- aarch64_be-linux-musl
+- armv7l-linux-musleabihf
+- armv7m-linux-musleabi
+- armv7r-linux-musleabihf
+- riscv32-linux-musl
+- riscv64-linux-musl
+- powerpc64le-linux-musl
 
 ## Example
 ```elixir

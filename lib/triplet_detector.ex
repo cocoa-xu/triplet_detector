@@ -1,7 +1,7 @@
 defmodule TripletDetector do
   require Logger
 
-  @all_linux_triplets [
+  @all_linux_gnu_triplets [
     "x86_64-linux-gnu",
     "aarch64-linux-gnu",
     "arm-linux-gnueabihf",
@@ -9,11 +9,35 @@ defmodule TripletDetector do
     "s390x-linux-gnu",
     "powerpc64le-linux-gnu"
   ]
+  @all_linux_musl_triplets [
+    "x86_64-linux-musl",
+    "aarch64-linux-musl",
+    "aarch64_be-linux-musl",
+    "armv7l-linux-musleabihf",
+    "armv7m-linux-musleabi",
+    "armv7r-linux-musleabihf",
+    "riscv32-linux-musl",
+    "riscv64-linux-musl",
+    "powerpc64le-linux-musl"
+  ]
+  @all_linux_triplets @all_linux_gnu_triplets ++ @all_linux_musl_triplets
   @all_apple_triplets [
     "x86_64-apple-darwin",
     "arm64-apple-darwin"
   ]
   @all_triplets @all_linux_triplets ++ @all_apple_triplets
+
+  @doc """
+  All available Linux GNU libc triplets
+  """
+  @spec all_linux_gnu_triplets() :: [String.t()]
+  def all_linux_gnu_triplets, do: @all_linux_gnu_triplets
+
+  @doc """
+  All available Linux musl libc triplets
+  """
+  @spec all_linux_musl_triplets() :: [String.t()]
+  def all_linux_musl_triplets, do: @all_linux_musl_triplets
 
   @doc """
   All available Linux triplets

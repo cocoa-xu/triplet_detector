@@ -4,7 +4,7 @@ defmodule TripletDetector.MixProject do
   @app :triplet_detector
   @version "0.1.0"
   @github_url "https://github.com/cocoa-xu/triplet_detector"
-  @precompiled_artefacts_version "0.1.0"
+  @precompiled_artefacts_version "0.1.1"
 
   def project do
     [
